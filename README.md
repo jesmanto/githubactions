@@ -101,7 +101,7 @@ To manage dependencies across different environments, follow these steps
     cd workflows
     touch gademo.yml
     ```
-### Creating a Multi-Environment Workflow
+### Creating a Parallel & Matrix Workflow
 - Give a name to the workflow
     ```
     name: Build and Test Node App CI
@@ -149,6 +149,51 @@ To manage dependencies across different environments, follow these steps
 4. `runs-on`: Defines the type of machine to run the job on. Here, it's using the latest Ubuntu virtual machine.
 5. `strategy.matrix`: This allows you to run the job on multiple versions of Nodejs, ensuring compatibility.
 6. `steps`: A sequence of tasks executed as part of the job 
+
+### Implementing parallel and matrix builds
+I ran the workflow using three different versions of node versions using matrix strategy, and the jobs were successful.
+    ![](/img/matrix_test.png)
+
+### Creating a Multi-Environment Workflow
+- Give a name to the workflow
+    ```
+    name: Build and Test Node App CI
+    ```
+- Specify the event to trigger the workflow. The snippet below shows that the workflow will trigger at a push event to the main branch. This is using the `on` term.
+    ```
+    on:
+        push:
+            branches: [main]
+    ```
+
+- Define the jobs that the workflow will execute. This part defines the workflow from code integration to code testing
+    ```
+    jobs:
+        build:
+
+            runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [14, 16, 18]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                node-version: ${{ matrix.node-version }}
+
+            - name: Install dependencies
+              run: npm install --save-dev jest supertest express
+
+            - name: Build Application
+              run: npm run build --if-present
+
+            - name: Test
+              run: npm test
 
 ## Challenges Faced
 I faced so many challenges that caused my workflows to fail, these challenges include:
