@@ -22,6 +22,7 @@ jobs:
         node-version: ${{ github.ref == 'refs/heads/main' && '18' || github.ref == 'refs/heads/staging' && '16' || '14' }}
 
     - name: Install dependencies
+      run: echo " ${{ vars.STATUS }} "
       run: npm install --save-dev jest supertest express dotenv --only=${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
     - name: Run tests
