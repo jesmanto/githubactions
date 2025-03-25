@@ -169,31 +169,38 @@ I ran the workflow using three different versions of node versions using matrix 
 - Define the jobs that the workflow will execute. This part defines the workflow from code integration to code testing
     ```
     jobs:
-        build:
+    build:
+        name: Build and Run Unit Tests
+        runs-on: ubuntu-latest
 
-            runs-on: ubuntu-latest
-
-        strategy:
-            matrix:
-                node-version: [14, 16, 18]
+        environment:
+        name: ${{ github.ref == 'refs/heads/main' && 'Prod' || github.ref == 'refs/heads/staging' && 'Staging' || 'Dev' }}
 
         steps:
-            - name: Checkout
-              uses: actions/checkout@v2
+        - name: Checkout
+        uses: actions/checkout@v2
 
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v4
-              with:
-                node-version: ${{ matrix.node-version }}
+        - name: Setup Node.js 
+        uses: actions/setup-node@v2
+        with:
+            node-version: ${{ github.ref == 'refs/heads/main' && '18' || github.ref == 'refs/heads/staging' && '16' || '14' }}
 
-            - name: Install dependencies
-              run: npm install --save-dev jest supertest express
+        - name: Install dependencies
+        run: |
+            echo " ${{ vars.STATUS }} " && npm install --save-dev jest supertest express dotenv --only=${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
-            - name: Build Application
-              run: npm run build --if-present
+        - name: Run tests
+        run: npm test
+    ```
 
-            - name: Test
-              run: npm test
+### Explanation
+1. `name`: This simply names your workflow. It's wht appears on Github when the workflow is running.
+2. `on`: This section defines when the workflow is triggered. Here, it's set to activate on push and pull request events to the main branch.
+3. `environment`: This section defines the environment the 
+4. `jobs`: Jobs are a set of steps that execute on the same runner. In example, there's one job named `build`.
+5. `runs-on`: Defines the type of machine to run the job on. Here, it's using the latest Ubuntu virtual machine.
+6. `steps`: A sequence of tasks executed as part of the job 
+7. Conditional statements were used to define the behaviour of the workflow based on the current environment.
 
 ## Challenges Faced
 I faced so many challenges that caused my workflows to fail, these challenges include:
