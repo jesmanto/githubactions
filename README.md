@@ -200,7 +200,7 @@ I ran the workflow using three different versions of node versions using matrix 
 4. `jobs`: Jobs are a set of steps that execute on the same runner. In example, there's one job named `build`.
 5. `runs-on`: Defines the type of machine to run the job on. Here, it's using the latest Ubuntu virtual machine.
 6. `steps`: A sequence of tasks executed as part of the job 
-7. Conditional statements were used to define the behaviour of the workflow based on the current environment.
+7. Conditional statements were used to define the behaviour of the workflow based on the current environment. 
 
 ## Challenges Faced
 I faced so many challenges that caused my workflows to fail, these challenges include:
