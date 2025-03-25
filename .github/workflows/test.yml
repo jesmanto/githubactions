@@ -20,7 +20,6 @@ jobs:
       uses: actions/setup-node@v2
       with:
         node-version: ${{ github.ref == 'refs/heads/main' && '18' || github.ref == 'refs/heads/staging' && '16' || '14' }}
-        cache: 'npm'
 
     - name: Install dependencies
       run: |
