@@ -184,6 +184,7 @@ I ran the workflow using three different versions of node versions using matrix 
         uses: actions/setup-node@v2
         with:
             node-version: ${{ github.ref == 'refs/heads/main' && '18' || github.ref == 'refs/heads/staging' && '16' || '14' }}
+        cache: 'npm'
 
         - name: Install dependencies
         run: |
@@ -204,13 +205,19 @@ I ran the workflow using three different versions of node versions using matrix 
 
 ## Challenges Faced
 I faced so many challenges that caused my workflows to fail, these challenges include:
-- Creating repository secret variables.
-- Proper indentation of various component
+- Creating new environments and variables.
+- Managing dependencies across different environment
 - integrating unit tests
-
 
 ## Lessons Learnt
 - I can trigger a workflow with the success status of the previous workflow 
-- secrets variables must be stored separately for each repository. This took me 2 hours to figure out, after 16 failures.
+- secrets variables must be stored separately for each repository. This took me 2 hours to figure out, after a lot of trials.
 - When working with github action yaml files, `name`, `uses` and `run` must be on the same line of indentation.
-- Install all necessary dependencies and test your application before pushing to remote repository.
+- You can not have two `run` statements in the same step.
+
+## Best Practices
+- Keep your actions minimal
+- Never hardcode secrets
+- Do not install dependencies unnecessarily. This can be done with `Github Caching Mechanism`
+- Ensure every repository contains a CI/CD workflow
+- Limit the use of environment variables
