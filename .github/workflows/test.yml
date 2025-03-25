@@ -23,7 +23,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        echo " ${{ vars.STATUS }} " && npm install --save-dev jest supertest express dotenv --only=${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+        echo " ${{ vars.STATUS }} " && npm install --save-dev jest supertest express dotenv
 
     - name: Run tests
       run: npm test
