@@ -101,7 +101,7 @@ To manage dependencies across different environments, follow these steps
     cd workflows
     touch gademo.yml
     ```
-### Creating a Multi-Environment Workflow
+### Creating a Parallel & Matrix Workflow
 - Give a name to the workflow
     ```
     name: Build and Test Node App CI
@@ -150,15 +150,74 @@ To manage dependencies across different environments, follow these steps
 5. `strategy.matrix`: This allows you to run the job on multiple versions of Nodejs, ensuring compatibility.
 6. `steps`: A sequence of tasks executed as part of the job 
 
+### Implementing parallel and matrix builds
+I ran the workflow using three different versions of node versions using matrix strategy, and the jobs were successful.
+    ![](/img/matrix_test.png)
+
+### Creating a Multi-Environment Workflow
+- Give a name to the workflow
+    ```
+    name: Build and Test Node App CI
+    ```
+- Specify the event to trigger the workflow. The snippet below shows that the workflow will trigger at a push event to the main branch. This is using the `on` term.
+    ```
+    on:
+        push:
+            branches: [main]
+    ```
+
+- Define the jobs that the workflow will execute. This part defines the workflow from code integration to code testing
+    ```
+    jobs:
+    build:
+        name: Build and Run Unit Tests
+        runs-on: ubuntu-latest
+
+        environment:
+        name: ${{ github.ref == 'refs/heads/main' && 'Prod' || github.ref == 'refs/heads/staging' && 'Staging' || 'Dev' }}
+
+        steps:
+        - name: Checkout
+        uses: actions/checkout@v2
+
+        - name: Setup Node.js 
+        uses: actions/setup-node@v2
+        with:
+            node-version: ${{ github.ref == 'refs/heads/main' && '18' || github.ref == 'refs/heads/staging' && '16' || '14' }}
+        cache: 'npm'
+
+        - name: Install dependencies
+        run: |
+            echo " ${{ vars.STATUS }} " && npm install --save-dev jest supertest express dotenv --only=${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+
+        - name: Run tests
+        run: npm test
+    ```
+
+### Explanation
+1. `name`: This simply names your workflow. It's wht appears on Github when the workflow is running.
+2. `on`: This section defines when the workflow is triggered. Here, it's set to activate on push and pull request events to the main branch.
+3. `environment`: This section defines the environment the 
+4. `jobs`: Jobs are a set of steps that execute on the same runner. In example, there's one job named `build`.
+5. `runs-on`: Defines the type of machine to run the job on. Here, it's using the latest Ubuntu virtual machine.
+6. `steps`: A sequence of tasks executed as part of the job 
+7. Conditional statements were used to define the behaviour of the workflow based on the current environment. 
+
 ## Challenges Faced
 I faced so many challenges that caused my workflows to fail, these challenges include:
-- Creating repository secret variables.
-- Proper indentation of various component
+- Creating new environments and variables.
+- Managing dependencies across different environment
 - integrating unit tests
-
 
 ## Lessons Learnt
 - I can trigger a workflow with the success status of the previous workflow 
-- secrets variables must be stored separately for each repository. This took me 2 hours to figure out, after 16 failures.
+- secrets variables must be stored separately for each repository. This took me 2 hours to figure out, after a lot of trials.
 - When working with github action yaml files, `name`, `uses` and `run` must be on the same line of indentation.
-- Install all necessary dependencies and test your application before pushing to remote repository.
+- You can not have two `run` statements in the same step.
+
+## Best Practices
+- Keep your actions minimal
+- Never hardcode secrets
+- Do not install dependencies unnecessarily. This can be done with `Github Caching Mechanism`
+- Ensure every repository contains a CI/CD workflow
+- Limit the use of environment variables
