@@ -23,7 +23,19 @@ jobs:
 
     - name: Install dependencies
       run: |
-        echo " ${{ vars.STATUS }} " && npm install jest supertest express dotenv --only=${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+        echo " ${{ vars.STATUS }} " && npm install --save-dev jest supertest express dotenv --only=${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
 
     - name: Run tests
-      run: npm test
+      if: github.ref != 'refs/heads/main'
+      run: |
+        npm test
+    
+    - name: Login to Docker Hub
+      if: github.ref == 'refs/heads/main'
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker Image
+      if: github.ref == 'refs/heads/main'
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/sample_node_app:latest .
+    - name: Push Docker Image to Docker Hub
+      if: github.ref == 'refs/heads/main'
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/sample_node_app:latest

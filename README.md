@@ -202,6 +202,19 @@ I ran the workflow using three different versions of node versions using matrix 
 5. `runs-on`: Defines the type of machine to run the job on. Here, it's using the latest Ubuntu virtual machine.
 6. `steps`: A sequence of tasks executed as part of the job 
 7. Conditional statements were used to define the behaviour of the workflow based on the current environment. 
+8. The application was containerized and the image of the application was deployed to dockerhub in the production environment.
+
+    ```
+    - name: Login to Docker Hub
+      if: github.ref == 'refs/heads/main'
+      run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+    - name: Build Docker Image
+      if: github.ref == 'refs/heads/main'
+      run: docker build -t ${{ secrets.DOCKER_USERNAME }}/sample_node_app:latest .
+    - name: Push Docker Image to Docker Hub
+      if: github.ref == 'refs/heads/main'
+      run: docker push ${{ secrets.DOCKER_USERNAME }}/sample_node_app:latest
+    ```
 
 ## Challenges Faced
 I faced so many challenges that caused my workflows to fail, these challenges include:
@@ -221,3 +234,4 @@ I faced so many challenges that caused my workflows to fail, these challenges in
 - Do not install dependencies unnecessarily. This can be done with `Github Caching Mechanism`
 - Ensure every repository contains a CI/CD workflow
 - Limit the use of environment variables
+- Run tests on staging and development environments only, deploy on production environment.
